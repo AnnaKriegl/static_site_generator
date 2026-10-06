@@ -25,7 +25,7 @@ def copy_folder_contents_recursive(source="./static", destination="./public"):
             copy_folder_contents_recursive(source=src_content_path, destination=desti_content_path)
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print (f"Generating page from {from_path} to {dest_path} using {template_path}")
     with open(from_path) as f:
         markdown = f.read()
@@ -35,8 +35,11 @@ def generate_page(from_path, template_path, dest_path):
 
     html_string = html_node.to_html()
     title = extract_title(markdown)
-    template = template.replace("{{ Title }}", title)
-    template = template.replace("{{ Content }}", html_string)
+    template = template.replace('{{ Title }}', title)
+    template = template.replace('{{ Content }}', html_string)
+    template = template.replace('href="/', f'href="{basepath}')
+    template = template.replace('src="/', f'src="{basepath}')
+
     
     if not os.path.exists(os.path.dirname(dest_path)):
         os.makedirs(os.path.dirname(dest_path))
@@ -45,20 +48,22 @@ def generate_page(from_path, template_path, dest_path):
         f.write(template)
     
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     if not os.path.exists(os.path.dirname(dest_dir_path)):
         os.makedirs(os.path.dirname(dest_dir_path))
 
     for content in os.listdir(dir_path_content):
-        src_content_path = os.path.join(dir_path_content, content)
-        desti_content_path = os.path.join(dest_dir_path, content.replace(".md", ".html"))
+        src_content_path = os.path.join( dir_path_content, content)
+        desti_content_path = os.path.join( dest_dir_path, content.replace(".md", ".html"))
 
         if os.path.isfile(src_content_path):
             generate_page(from_path=src_content_path, 
                           template_path=template_path, 
-                          dest_path=desti_content_path)
+                          dest_path=desti_content_path,
+                          basepath=basepath)
 
         elif os.path.isdir(src_content_path):
             generate_pages_recursive(dir_path_content=src_content_path, 
                                     template_path=template_path, 
-                                    dest_dir_path=desti_content_path)
+                                    dest_dir_path=desti_content_path,
+                                    basepath=basepath)
