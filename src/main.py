@@ -12,7 +12,6 @@ basepath = "/"
 def main():
     if sys.argv:
         basepath = sys.argv[1]
-        print ('sus', sys.argv[1])
 
     print( "Deleting public directory...")
     if os.path.exists(dir_path_public):
